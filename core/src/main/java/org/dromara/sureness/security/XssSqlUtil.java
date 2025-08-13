@@ -45,11 +45,18 @@ public class XssSqlUtil {
     public static String stripXss(String value) {
         String rlt = null;
 
-        if (null != value) {
-            // NOTE: It's highly recommended to use the ESAPI library and uncomment the following line to
-            // avoid encoded attacks.
+        if (value != null) {
+            // Canonicalize input to handle encoded attacks
+            rlt = ESAPI.encoder().canonicalize(value);
 
-            rlt = value.replaceAll("", "");
+            // Avoid null characters
+            rlt = rlt.replaceAll("", "");
+
+            // Avoid "; sequences
+            rlt = rlt.replaceAll("\";", "");
+            rlt = rlt.replaceAll("';", "");
+            rlt = rlt.replaceAll("\"\\);", "");
+            rlt = rlt.replaceAll("'\\);", "");
 
             // Avoid anything between script tags
             rlt = SCRIPT1_PATTERN.matcher(rlt).replaceAll("");
